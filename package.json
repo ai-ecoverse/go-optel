@@ -1,0 +1,22 @@
+{
+  "name": "go-optel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Dependency-free Go client for the helix-rum-js operational telemetry wire format",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ai-ecoverse/go-optel.git"
+  },
+  "scripts": {
+    "lint": "slicc-lint-comments && slicc-no-unit-tests && slicc-agents-md && test -z \"$(gofmt -l .)\" && go mod tidy -diff && go vet ./... && golangci-lint run",
+    "format": "gofmt -w .",
+    "test": "go test -race ./test/integration/...",
+    "test:unit": "go test -race -cover ./...",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@ai-ecoverse/slicc-shared-web": "1.12.0",
+    "semantic-release": "25.0.9"
+  }
+}

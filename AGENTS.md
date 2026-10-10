@@ -1,0 +1,3 @@
+# go-optel
+
+`github.com/ai-ecoverse/go-optel`: a dependency-free Go client for the helix-rum-js operational telemetry wire format, used by slicc-cli. Go only, no cgo. Two checkpoints in practice: `Enter` and `Error`. Errors always go through `ReportError`, which runs `Sanitize` before truncating; never send a raw error string. No comments in any file except Go directives. Agent guidance lives only in this AGENTS.md (≤1000 characters). Do not add CLAUDE.md. Unit tests (`*_test.go` next to the code) are gitignored; `test/integration/` is committed and runs in CI. `npm run lint` runs the slicc lint tools, gofmt, tidy, vet and golangci-lint. Releases are GitHub tags via semantic-release, which the Go module proxy picks up.
