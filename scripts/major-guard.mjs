@@ -8,16 +8,17 @@ export function moduleMajor(goMod) {
     throw new Error("major-guard: go.mod has no module directive");
   }
   const suffix = match[1].match(/\/v(\d+)$/);
-  return { path: match[1], major: suffix ? Number(suffix[1]) : 1 };
+  const major = suffix ? Number(suffix[1]) : 1;
+  return { path: match[1], major, allowed: suffix ? [major] : [0, 1] };
 }
 
 export async function verifyRelease(_config, { cwd, nextRelease, logger }) {
-  const { path, major } = moduleMajor(await readFile(join(cwd, "go.mod"), "utf8"));
+  const { path, allowed } = moduleMajor(await readFile(join(cwd, "go.mod"), "utf8"));
   const next = Number(nextRelease.version.split(".")[0]);
-  if (next > major) {
-    throw new Error(
-      `major-guard: v${nextRelease.version} needs module path ${path.replace(/\/v\d+$/, "")}/v${next}, go.mod declares ${path}`,
-    );
+  if (!allowed.includes(next)) {
+    const base = path.replace(/\/v\d+$/, "");
+    const want = next < 2 ? base : `${base}/v${next}`;
+    throw new Error(`major-guard: v${nextRelease.version} needs module path ${want}, go.mod declares ${path}`);
   }
   logger.log(`major-guard: v${nextRelease.version} fits ${path}`);
 }
