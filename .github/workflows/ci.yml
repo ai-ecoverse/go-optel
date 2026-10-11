@@ -37,3 +37,12 @@ jobs:
       - run: npm run lint
 
       - run: npm test
+
+      - name: Major-version guard
+        run: |
+          node scripts/major-guard.mjs 0.9.0
+          node scripts/major-guard.mjs 1.4.2
+          if node scripts/major-guard.mjs 2.0.0; then
+            echo "major-guard accepted 2.0.0 for a v1 module path"
+            exit 1
+          fi

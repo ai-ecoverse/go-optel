@@ -1,5 +1,7 @@
 # go-optel
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/ai-ecoverse/go-optel.svg)](https://pkg.go.dev/github.com/ai-ecoverse/go-optel)
+
 A dependency-free Go client for Adobe's [helix-rum-js](https://github.com/adobe/helix-rum-js) wire format, the operational telemetry (OpTel) beacons that SLICC's web pages and native apps send. It is used by [slicc-cli](https://github.com/ai-ecoverse/slicc-cli). OpTel is Adobe's RUM-style operational telemetry, not OpenTelemetry.
 
 ```sh
@@ -7,17 +9,28 @@ go get github.com/ai-ecoverse/go-optel
 ```
 
 ```go
-import optel "github.com/ai-ecoverse/go-optel"
+package main
 
-client := optel.Configure("slicc-cli", optel.Options{})
-defer client.Flush(2 * time.Second)
+import (
+	"os"
+	"time"
 
-client.Sample(optel.Enter, "follow", "")
+	optel "github.com/ai-ecoverse/go-optel"
+)
 
-if err != nil {
-	client.ReportError("dial", err)
+func main() {
+	client := optel.Configure("slicc-cli", optel.Options{})
+	defer client.Flush(2 * time.Second)
+
+	client.Sample(optel.Enter, "follow", "")
+
+	if _, err := os.Open("missing.json"); err != nil {
+		client.ReportError("config", err)
+	}
 }
 ```
+
+`Configure` makes the one sampling decision for the process, `Sample(optel.Enter, …)` records the subcommand, `ReportError` sanitizes and sends a failure, and `Flush` waits up to the timeout for beacons still in flight. All methods are safe on a nil `*Client`, so a caller that opts out can skip `Configure` and keep the calls.
 
 ## Checkpoints
 
@@ -52,3 +65,9 @@ Callers add their own opt-out on top; slicc-cli honors `SLICC_NO_TELEMETRY=1` an
 ## Development
 
 `npm run lint` runs the slicc lint tools, `gofmt`, `go mod tidy -diff`, `go vet` and golangci-lint. `npm test` runs the integration tests in `test/integration/` against a local collector. Unit tests stay next to the code and out of git (`npm run test:unit`). Releases are GitHub tags cut by semantic-release on `main`; the Go module proxy serves them.
+
+## Releases
+
+semantic-release tags `vX.Y.Z` from conventional commits on `main`. The release fails if the next major exceeds the major the module path allows: 1 without a suffix, so `v0.x` and `v1.x`, and `N` with a `/vN` suffix; a breaking change first needs the module path moved to `/v2`. After tagging, the workflow asks `proxy.golang.org` and `pkg.go.dev` to fetch the new version, best effort.
+
+Never move or delete a pushed tag. `sum.golang.org` records the checksum of every version forever, so a moved tag breaks every build that fetches it. Retract a bad version with a `retract` directive in `go.mod` and cut a new release.

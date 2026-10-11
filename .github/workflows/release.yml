@@ -42,3 +42,22 @@ jobs:
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Warm the Go module proxy and pkg.go.dev
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}
+        env:
+          MODULE: github.com/ai-ecoverse/go-optel
+        run: |
+          tag=$(git -C "$GITHUB_WORKSPACE" tag --points-at HEAD --list 'v*' | sort -V | tail -n 1)
+          if [ -z "$tag" ]; then
+            echo "no release tag on HEAD"
+            exit 0
+          fi
+          for attempt in 1 2 3 4 5; do
+            if GOPROXY=https://proxy.golang.org GOFLAGS=-mod=mod go list -m "$MODULE@$tag"; then
+              break
+            fi
+            sleep $((attempt * 10))
+          done
+          curl -fsS -X POST --max-time 30 "https://pkg.go.dev/fetch/$MODULE@$tag" || true
