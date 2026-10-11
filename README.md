@@ -68,6 +68,6 @@ Callers add their own opt-out on top; slicc-cli honors `SLICC_NO_TELEMETRY=1` an
 
 ## Releases
 
-semantic-release tags `vX.Y.Z` from conventional commits on `main`. The release fails if the next major exceeds the major the module path allows: 1 without a suffix, so `v0.x` and `v1.x`, and `N` with a `/vN` suffix; a breaking change first needs the module path moved to `/v2`. After tagging, the workflow asks `proxy.golang.org` and `pkg.go.dev` to fetch the new version, best effort.
+semantic-release tags `vX.Y.Z` from conventional commits on `main`. The release fails unless the next major matches the module path: `v0.x` or `v1.x` without a suffix, exactly `vN.x` with a `/vN` suffix. A breaking change first needs the module path moved to `/v2`, and that change must itself be released as `v2.0.0`. After tagging, the workflow asks `proxy.golang.org` and `pkg.go.dev` to fetch the new version, best effort.
 
 Never move or delete a pushed tag. `sum.golang.org` records the checksum of every version forever, so a moved tag breaks every build that fetches it. Retract a bad version with a `retract` directive in `go.mod` and cut a new release.
