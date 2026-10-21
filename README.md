@@ -64,7 +64,7 @@ Callers add their own opt-out on top; slicc-cli honors `SLICC_NO_TELEMETRY=1` an
 
 ## Development
 
-`npm run lint` runs the slicc lint tools, `gofmt`, `go mod tidy -diff`, `go vet` and golangci-lint. `npm test` runs the integration tests in `test/integration/` against a local collector. Unit tests stay next to the code and out of git (`npm run test:unit`). Releases are GitHub tags cut by semantic-release on `main`; the Go module proxy serves them.
+`npm run lint` runs the slicc lint tools, `gofmt`, `go mod tidy -diff`, `go vet` and golangci-lint. `npm test` runs the integration tests in `test/integration/` against a local collector. Unit tests stay next to the code and out of git (`npm run test:unit`). `npm install` installs lefthook pre-commit hooks that run the shared slicc checks plus `gofmt`, tidy and vet, and fail closed when `node_modules` is missing. Releases are GitHub tags cut by semantic-release on `main`; the Go module proxy serves them.
 
 ## Releases
 
